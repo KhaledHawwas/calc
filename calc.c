@@ -1,6 +1,8 @@
 #include<stdio.h>
 #include<conio.h>
 #include<string.h>
+#include<time.h>
+#include<math.h>
 #define array_size 50
 enum Operator{E= -1/*no oeprator*/,ADD,MIN,MUL,DIV,REM};
 int isdigit(char c) {
@@ -15,13 +17,30 @@ int getnum(char c) {
     return -1;
 }
 
+//remove useless zeros and point then print result 
+void printres(double d){
+	char buff[100];
+	snprintf(buff,100,"%f",d);
+	for(int i=strlen(buff)-1;i>=0;i--){//{-1} for a white space
+	if(buff[i]=='0'){
+		buff[i]='\0';
+	}else if(buff[i]=='.'){
+		buff[i]='\0';
+		break;
+	}else{
+	break;
+	}
+	}
+	printf("result = %s",buff);
+}
+
 int main() {
 	int pos=0;
-    int num1, num2,op=E, res,
-	innum1,
-	innum2;
+    double num1,res, num2;int op=E, 
+	innum1,//0 if didn't started yet 1 if reading 2 if reading end
+	innum2, 
+	point=0;//point reached
     char choice[array_size]="";
-    {
 start:
 //reset variables
         innum1=0;
@@ -30,9 +49,9 @@ start:
         num2=0;
         num1=0;
 		res=0;
-		for(int i=0;i<array_size;i++){
-		choice[i]=' ';
-		}//reset variables ends
+		point=0;
+		* choice="";
+		//reset variables ends
 		//get user input
 		printf("\n->");
 		fgets(choice,array_size,stdin);
@@ -76,6 +95,7 @@ start:
 set_num://this label to end reading number
                 if(innum1==1) {//if reading num 
                     innum1=2;//stop read 
+					point =0;
                 } else if(innum2==1) {
                     innum2=2;
                 }
@@ -83,19 +103,30 @@ set_num://this label to end reading number
             } else if(isdigit(thischar)) {
                 if(innum1==1||innum1==0) {//continue read num1 or start read it  
                     innum1=1;//set it reading if it just start 
-					//add selected cahr to num
+					//add selected char to num
+					if(point){
+					num1+=getnum(thischar)/pow(10,point);
+					point++;
+					}else{
                     num1=num1*10;
                     num1+= getnum((int)choice[pos]);
-
+					}
                 } else if(innum2==1||innum2==0) {
-                    innum2=1;
-                    num2=num2*10;
+					innum2=1;
+                    if(point){
+					num2+=getnum(thischar)/pow(10,point);
+					point++;
+					}else{
+					num2=point?num2:num2*10;
                     num2+= getnum(choice[pos]);
-
+					}
                 }
-            } else {//if it notvaild letter (not space or digit or operator)
+            } else if(thischar=='.'){
+			point=1;//set point true
+			}
+			else{//if it not vaild letter (not space or digit or operator)
 				printf("unvaild letter\n");
-				printf("{%s}",choice);
+				printf("%s",choice);
 				printf("\n");
 			for(int i = 0 ; i < pos ;i++){printf("-");}
 				printf("^");
@@ -120,12 +151,9 @@ set_num://this label to end reading number
         } else if(op==MUL) {
             res=num1*num2;
         }else if(op==REM){
-			res=num1%num2;
+			res=(int)num1%(int)num2;
 		}
-        printf("\nresult=%d\n",res);
-
+printres(res);
         goto start;
         return 0;
-    }
-
 }
